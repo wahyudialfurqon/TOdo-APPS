@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:todo/models/task_models.dart';
 import 'package:todo/theme.dart';
 
@@ -10,8 +13,57 @@ class HomeScreens extends StatefulWidget {
 }
 
 class _HomeScreensState extends State<HomeScreens> {
+  String _nickName = 'User123';
+  String _curentTime = '';
+  String _greeting = '';
+
+  Timer? _timer;
   
   @override
+  void initState(){
+    super.initState();
+    _updateTime();
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) => _updateTime());
+
+    super.initState();
+    _loadNickName();
+  }
+
+  void _updateTime(){
+    final now = DateTime.now();
+    setState((){
+      _curentTime = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}';
+      _greeting = _getGreeting(now.hour);
+    });
+  }
+
+  String _getGreeting(int hour){
+      if (hour < 12) {
+      return "Good Morning";
+    } else if (hour < 18) {
+      return "Good Afternoon";
+    } else {
+      return "Good Evening";
+    }
+  }
+
+  Future<void> _loadNickName() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? savedNickName = prefs.getString('User123');
+
+    if(savedNickName != null && savedNickName.isNotEmpty){
+      setState((){
+        _nickName = savedNickName;
+      });
+    }
+  }
+
+  @override
+  void dispose(){
+    _timer?.cancel();
+    super.initState();
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -32,7 +84,7 @@ class _HomeScreensState extends State<HomeScreens> {
           ),
           SizedBox(height: 30),
           Text(
-            'YourNickname!',
+            _nickName,
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
@@ -52,17 +104,17 @@ class _HomeScreensState extends State<HomeScreens> {
                 padding: const EdgeInsets.only(top: 10),
                 child: Center(
                   child: Text(
-                    'Good Afternoon',
+                    _greeting,
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold
                     )
                   ),
                 ),
               ),
-              const SizedBox(height: 15),
+              const SizedBox(height: 5),
               Text(
-                '19:30',
+                _curentTime,
                 style: TextStyle(
                   fontFamily: 'DS-DIGI',
                   fontSize: 60,
@@ -90,7 +142,7 @@ class _HomeScreensState extends State<HomeScreens> {
                   itemBuilder: (context, index){
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
-                      child: buildCard(taskList[index].title, taskList[index].date),
+                      child: buildCard(context, taskList[index].title, taskList[index].date),
                     );
                   }
                 )
@@ -102,10 +154,8 @@ class _HomeScreensState extends State<HomeScreens> {
             right: 20,
             child: GestureDetector(
                onTap: () {
-                Navigator.pushNamed(context, '/detailTask');
+                Navigator.pushNamed(context, '/createTask');
               },
-              child: Opacity(
-              opacity: 1.0,
               child: Image.asset(
                 'icons/Add.png',
                 width: 50,
@@ -113,62 +163,66 @@ class _HomeScreensState extends State<HomeScreens> {
               )
             )
             )
-          )
         ],
       ),
     );
   }
 }
-Widget buildCard(String title, String date){
+Widget buildCard(BuildContext context, String title, String date){
 return  SizedBox(
-    child: Card(
-      color: AppColors.bgSplashScreen,
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Align(
-            alignment: Alignment.topLeft,
-            child: Padding(
+    child: GestureDetector(
+     onTap: () {
+        Navigator.pushNamed(context, '/detailTask');
+      },
+      child: Card(
+        color: AppColors.bgSplashScreen,
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Align(
+              alignment: Alignment.topLeft,
+              child: Padding(
+                padding: EdgeInsets.all(15),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      )
+                    ),
+                    const SizedBox(height: 1),
+                    Text(
+                      date,
+                      style: TextStyle(
+                        fontSize: 12,
+                      )
+                    )
+                  ],
+                )
+              ),
+            ),
+            Padding(
               padding: EdgeInsets.all(15),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    )
-                  ),
-                  const SizedBox(height: 1),
-                  Text(
-                    date,
-                    style: TextStyle(
-                      fontSize: 12,
-                    )
-                  )
-                ],
-              )
+              child: ClipRRect(
+                child: Image.asset(
+                  'images/Profile.jpg',
+                  width: 24,
+                  height: 24,
+                  fit: BoxFit.cover
+                )
+              ),
             ),
-          ),
-          Padding(
-            padding: EdgeInsets.all(15),
-            child: ClipRRect(
-              child: Image.asset(
-                'images/Profile.jpg',
-                width: 24,
-                height: 24,
-                fit: BoxFit.cover
-              )
-            ),
-          ),
-        ],
-      )
+          ],
+        )
+      ),
     ),
   );
 }

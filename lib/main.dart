@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:todo/screens/createName_screens.dart';
+import 'package:todo/screens/createTask_screens.dart';
 import 'package:todo/screens/detailTask_screens.dart';
 import 'package:todo/screens/home_screens.dart';
 import 'package:todo/screens/onboard_screens.dart';
@@ -15,6 +16,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      // home: CreateNameScreens(),
       debugShowCheckedModeBanner: false,
       initialRoute: '/splash',
       routes: {
@@ -22,7 +24,8 @@ class MainApp extends StatelessWidget {
       '/onboard': (context) => const OnboardScreens(),
       '/home': (context) => const HomeScreens(),
       '/createName': (context) => const CreateNameScreens(),
-      '/detailTask': (context) => const DetailScreens(),
+      '/detailTask': (context) => const DetailTaskScreens(),
+      '/createTask': (context) => const CreateScreens(),
       },
     );
   }

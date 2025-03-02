@@ -17,10 +17,13 @@ class _OnboardScreensState extends State<OnboardScreens> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset(
-              'images/onboard1.png',
-              width: 171,
-              height: 171,
+            Hero(
+              tag: "LogoHero",
+              child: Image.asset(
+                'images/onboard1.png',
+                width: 171,
+                height: 171,
+              ),
             ),
              const SizedBox(height: 80),
             Text(

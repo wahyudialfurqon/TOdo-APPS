@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:todo/theme.dart';
 
 class CreateNameScreens extends StatefulWidget {
@@ -14,12 +15,32 @@ class _CreateNameScreensState extends State<CreateNameScreens> {
 
   @override
   void initState(){
+    //Save Nickname
+    super.initState();
+    _loadNickName();
+
     super.initState();
     _controller.addListener((){
       setState((){
         _isEmpty = _controller.text.isEmpty;
       });
     });
+  }
+
+  Future<void> _saveNickName() async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('User123', _controller.text);
+  }
+
+  Future<void> _loadNickName() async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? savedNickName = prefs.getString('User123');
+    if(savedNickName != null && savedNickName.isNotEmpty){
+      setState(){
+        _controller.text = savedNickName;
+        _isEmpty = false;
+      }
+    }
   }
 
   Widget build(BuildContext context) {
@@ -53,10 +74,13 @@ class _CreateNameScreensState extends State<CreateNameScreens> {
                     )
                   ),
                   const SizedBox(height: 50),
-                  Image.asset(
-                    'images/onboard2.png',
-                    width: 171,
-                    height: 170,
+                  Hero(
+                    tag: "LogoHero",
+                    child: Image.asset(
+                      'images/onboard2.png',
+                      width: 171,
+                      height: 170,
+                    ),
                   ),
                   const SizedBox(height: 30),
                   SizedBox(
@@ -96,7 +120,8 @@ class _CreateNameScreensState extends State<CreateNameScreens> {
                   SizedBox(
                     width: 310,
                     child: ElevatedButton(
-                      onPressed: (){
+                      onPressed: _isEmpty ? null : () async {
+                        await _saveNickName(); // Save Dulu sblm pindah screen
                         Navigator.pushReplacementNamed(context, '/home');
                       }, 
                       style: ElevatedButton.styleFrom(
